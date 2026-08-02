@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Code Lab - EduVerse AI{% endblock %}
+
+{% block extra_head %}
+<!-- CodeMirror libraries for code highlighting in browser workspace editor -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+<style>
+    .CodeMirror {
+        height: calc(100vh - 320px) !important;
+        min-height: 380px;
+        border-radius: 12px;
+        font-size: 15px;
+        box-shadow: var(--shadow-sm);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Pane: Editor Container -->
+    <div class="col-lg-6 mb-4">
+        <div class="edu-card">
+            
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-1" style="color: var(--text-primary);"><i class="fa-solid fa-code text-primary me-2"></i>My Workspace Editor</h5>
+                    <p class="caption-text mb-0">Code your HTML layout here, then press Run to view output.</p>
+                </div>
+                
+                <button type="button" class="btn btn-primary-edu py-2 px-4 shadow-sm" onclick="runOutputCode()">
+                    Run Code <i class="fa-solid fa-play ms-2"></i>
+                </button>
+            </div>
+
+            <!-- Editor Area -->
+            <textarea id="editorHtml"><h3>Welcome to my first page!</h3>
+<p>I am learning to build websites on EduVerse AI!</p>
+<button onclick="alert('Hello world!')">Click Me!</button></textarea>
+
+        </div>
+    </div>
+
+    <!-- Right Pane: Browser Sandboxed Output -->
+    <div class="col-lg-6 mb-4">
+        <div class="edu-card d-flex flex-column h-100" style="min-height: 480px;">
+            <h5 class="fw-bold mb-3" style="color: var(--text-primary);"><i class="fa-solid fa-desktop text-secondary me-2"></i>Live Output Preview</h5>
+            
+            <!-- Output frame -->
+            <iframe id="iframeSandbox" class="w-100 flex-grow-1 rounded-4 border" style="background-color: white; border-color: var(--border-color) !important; min-height: 380px;"></iframe>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- CodeMirror libraries scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+<script>
+    let editor;
+    document.addEventListener('DOMContentLoaded', () => {
+        editor = CodeMirror.fromTextArea(document.getElementById('editorHtml'), {
+            lineNumbers: true,
+            mode: "htmlmixed",
+            theme: "dracula",
+            tabSize: 4
+        });
+        runOutputCode();
+    });
+
+    const runOutputCode = () => {
+        const rawCode = editor.getValue();
+        const iframe = document.getElementById('iframeSandbox');
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        
+        doc.open();
+        doc.write(rawCode);
+        doc.close();
+    };
+</script>
+{% endblock %}

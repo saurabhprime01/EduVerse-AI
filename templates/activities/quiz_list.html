@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Adaptive Quizzes - EduVerse AI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Hand: Subject Grid -->
+    <div class="col-lg-8 mb-4">
+        <div class="edu-card">
+            
+            <div class="mb-4">
+                <span class="badge bg-primary-light text-primary rounded-pill px-3 py-1 mb-2 fw-bold" style="font-size: 0.75rem;">QUIZ ZONE</span>
+                <h3 class="fw-bold mb-1" style="color: var(--text-primary); letter-spacing: -0.5px;">Play Adaptive Quizzes</h3>
+                <p class="body-text text-muted">Test your knowledge! The quiz gets harder or easier automatically based on your answers.</p>
+            </div>
+
+            <div class="row">
+                {% for sub_code, sub_name in subjects %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card p-4 h-100 text-center rounded-4 border" style="background-color: var(--bg-card); border-color: var(--border-color) !important; transition: all 0.2s ease;">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3 mx-auto" 
+                                 style="width: 56px; height: 56px; background-color: var(--primary-light); color: var(--primary);">
+                                <i class="fa-solid {% if sub_code == 'math' %}fa-calculator{% elif sub_code == 'science' %}fa-rocket{% elif sub_code == 'english' %}fa-book{% else %}fa-code{% endif %} fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2" style="color: var(--text-primary);">{{ sub_name }}</h5>
+                            <p class="caption-text mb-4">5 Adaptive questions. Earn up to 50 XP and 20 Coins!</p>
+                            
+                            <a href="{% url 'activities:quiz_start' subject=sub_code %}" class="btn btn-primary-edu w-100 mt-auto py-2">
+                                Start Quiz! 🚀
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Right Hand: Quiz History -->
+    <div class="col-lg-4 mb-4">
+        <div class="edu-card h-100">
+            <h5 class="fw-bold mb-3" style="color: var(--text-primary);"><i class="fa-solid fa-clock-rotate-left text-secondary me-2"></i>My Recent Scores</h5>
+            <p class="caption-text mb-4">Track your performance milestones across previous challenges.</p>
+            
+            {% if recent_quizzes %}
+                <div class="d-flex flex-column gap-2">
+                    {% for quiz in recent_quizzes %}
+                        <div class="d-flex justify-content-between align-items-center p-3 rounded-4" style="background-color: var(--primary-light); border: 1px solid var(--border-color);">
+                            <div>
+                                <strong style="font-size: 0.95rem; color: var(--text-primary);">{{ quiz.subject|title }}</strong>
+                                <div class="text-muted" style="font-size: 0.75rem;">{{ quiz.completed_at|date:"M d, Y" }}</div>
+                            </div>
+                            <span class="badge rounded-pill {% if quiz.score >= 80 %}bg-success{% elif quiz.score >= 50 %}bg-warning{% else %}bg-danger{% endif %} py-2 px-3 fw-bold" style="font-size: 0.75rem;">
+                                {{ quiz.score|floatformat:0 }}%
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-square-poll-vertical fs-1 mb-2 d-block text-muted opacity-50"></i>
+                    No quizzes taken yet. Ready to try one?
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

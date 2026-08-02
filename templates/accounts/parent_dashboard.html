@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Parent Room - EduVerse AI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="edu-card p-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                <div class="d-flex align-items-center mb-3 mb-md-0">
+                    <div class="bg-primary-light p-3 rounded-circle me-3 text-primary" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-people-roof fs-3"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0" style="color: var(--text-primary);">Parent Room</h3>
+                        <p class="caption-text text-muted mb-0">Insights and control panel for your child's learning twin.</p>
+                    </div>
+                </div>
+                
+                {% if profile %}
+                <form method="post" class="d-flex align-items-center gap-2">
+                    {% csrf_token %}
+                    <span class="fw-bold text-muted text-nowrap" style="font-size: 0.85rem;">Adjust Difficulty:</span>
+                    <select name="difficulty_level" class="form-select rounded-pill" onchange="this.form.submit()">
+                        <option value="beginner" {% if profile.difficulty_level == 'beginner' %}selected{% endif %}>Beginner (Ages 5-8)</option>
+                        <option value="intermediate" {% if profile.difficulty_level == 'intermediate' %}selected{% endif %}>Intermediate (Ages 9-12)</option>
+                        <option value="advanced" {% if profile.difficulty_level == 'advanced' %}selected{% endif %}>Advanced (Ages 13-15)</option>
+                    </select>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not profile %}
+<div class="row">
+    <div class="col-md-6 mx-auto text-center mt-5">
+        <i class="fa-solid fa-face-sad-tear text-muted fs-1 mb-3"></i>
+        <h4 class="fw-bold" style="color: var(--text-primary);">No active child profiles linked!</h4>
+        <p class="body-text text-muted mb-4">Register a child account to see real-time learning twin reports here.</p>
+        <a href="{% url 'accounts:signup' %}" class="btn btn-primary-edu px-4 py-2 mt-2">Create Child Profile</a>
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <!-- Left Column: Child Overview & Topic Lists -->
+    <div class="col-lg-5 mb-4">
+        
+        <!-- Profile Card -->
+        <div class="edu-card mb-4">
+            <h5 class="fw-bold mb-3" style="color: var(--text-primary);"><i class="fa-solid fa-child text-primary me-2"></i>Learner Profile</h5>
+            
+            <div class="d-flex align-items-center p-3 rounded-4 mb-3" style="background-color: var(--primary-light); border: 1px solid var(--border-color);">
+                <img src="{% static 'img/' %}{{ profile.avatar }}.png" 
+                     onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed={{ profile.user.username }}';"
+                     alt="Avatar" class="rounded-circle bg-white border border-2 border-primary me-3" style="width: 64px; height: 64px;">
+                <div>
+                    <h5 class="fw-bold mb-0" style="color: var(--text-primary);">{{ profile.user.username|title }}</h5>
+                    <span class="badge bg-secondary text-white rounded-pill mt-1" style="font-size: 0.72rem;">Age: {{ profile.age }}</span>
+                    <span class="badge bg-primary text-white rounded-pill mt-1 ms-1" style="font-size: 0.72rem;">Style: {{ profile.get_learning_style_display }}</span>
+                </div>
+            </div>
+            
+            <div class="row text-center mt-2 g-2">
+                <div class="col-4">
+                    <div class="p-2 border rounded-4" style="background-color: var(--bg-main); border-color: var(--border-color) !important;">
+                        <div class="fs-4 fw-bold text-primary">{{ profile.xp }}</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">XP Earned</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 border rounded-4" style="background-color: var(--bg-main); border-color: var(--border-color) !important;">
+                        <div class="fs-4 fw-bold text-accent">{{ profile.coins }}</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">Coins</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 border rounded-4" style="background-color: var(--bg-main); border-color: var(--border-color) !important;">
+                        <div class="fs-4 fw-bold text-danger">{{ profile.streak }} 🔥</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">Day Streak</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strong & Weak Topics -->
+        <div class="edu-card">
+            <h5 class="fw-bold mb-3" style="color: var(--text-primary);"><i class="fa-solid fa-bullseye text-secondary me-2"></i>Subject Performance</h5>
+            
+            <div class="mb-4">
+                <div class="fw-bold text-success mb-2" style="font-size: 0.9rem;"><i class="fa-solid fa-circle-check me-2"></i>Strong Areas (>=75% Mastery)</div>
+                {% if strong_topics %}
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for topic in strong_topics %}
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2" style="font-size: 0.8rem;">
+                                {{ topic.subject|title }}: {{ topic.topic }} ({{ topic.mastery_score|floatformat:0 }}%)
+                            </span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-muted" style="font-size: 0.85rem; padding-left: 20px;">No topics mastered yet. Keep learning!</div>
+                {% endif %}
+            </div>
+
+            <div>
+                <div class="fw-bold text-danger mb-2" style="font-size: 0.9rem;"><i class="fa-solid fa-triangle-exclamation me-2"></i>Focus Areas (&lt;50% Mastery)</div>
+                {% if weak_topics %}
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for topic in weak_topics %}
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-2" style="font-size: 0.8rem;">
+                                {{ topic.subject|title }}: {{ topic.topic }} ({{ topic.mastery_score|floatformat:0 }}%)
+                            </span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-muted" style="font-size: 0.85rem; padding-left: 20px;">Doing great! No struggling topics identified yet.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Charts & Logs -->
+    <div class="col-lg-7 mb-4">
+        
+        <!-- Topic Mastery Chart -->
+        <div class="edu-card mb-4">
+            <h5 class="fw-bold mb-3" style="color: var(--text-primary);"><i class="fa-solid fa-chart-simple text-accent me-2"></i>Mastery Mapping</h5>
+            {% if topics %}
+                <div style="height: 250px; position: relative;">
+                    <canvas id="masteryChart"></canvas>
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-chart-line fs-2 mb-2 d-block"></i>
+                    No study activity recorded yet to chart performance.
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- AI Pedagogical Advisor Tips -->
+        <div class="edu-card mb-4" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(108, 92, 231, 0.05)); border: 1.5px solid var(--secondary) !important;">
+            <h5 class="fw-bold mb-3" style="color: var(--text-primary);"><i class="fa-solid fa-graduation-cap text-secondary me-2"></i>AI Pedagogical Advisor</h5>
+            <p class="caption-text text-muted mb-4">Custom teaching strategies prepared for you to help your child master concepts offline:</p>
+            
+            <div class="d-flex flex-column gap-3">
+                {% for tip in parent_tips %}
+                    <div class="p-3 rounded-4 border" style="background-color: var(--bg-card); border-color: var(--border-color) !important;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-secondary text-white rounded-pill">{{ tip.topic }}</span>
+                            <span class="text-muted small">Topic Concern</span>
+                        </div>
+                        <div class="fw-bold text-danger mb-2" style="font-size: 0.9rem;">
+                            <i class="fa-solid fa-circle-exclamation me-1"></i>{{ tip.struggle }}
+                        </div>
+                        <p class="mb-0 text-muted body-text" style="font-size: 0.88rem; line-height: 1.5; color: var(--text-secondary) !important;">
+                            <strong>Parent Tip:</strong> {{ tip.tip }}
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- AI Memory (The AI's log of the child) -->
+        <div class="edu-card mb-4">
+            <h5 class="fw-bold mb-3" style="color: var(--text-primary);"><i class="fa-solid fa-brain text-primary me-2"></i>AI Memory Log</h5>
+            <p class="caption-text text-muted mb-3">This log details what the AI has recorded in memory about the student to personalize conversations.</p>
+            
+            {% if memories %}
+                <div class="list-group list-group-flush">
+                    {% for memory in memories %}
+                        <div class="list-group-item bg-transparent px-0 border-light d-flex justify-content-between align-items-center" style="border-color: var(--border-color) !important;">
+                            <div>
+                                <span class="badge bg-primary text-white rounded-pill me-2" style="font-size: 0.7rem;">{{ memory.get_category_display }}</span>
+                                <strong style="font-size: 0.9rem; color: var(--text-primary);">{{ memory.key|title }}</strong>
+                            </div>
+                            <span class="text-muted body-text" style="font-size: 0.9rem; color: var(--text-secondary) !important;">{{ memory.value }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-3 text-muted" style="font-size: 0.85rem;">
+                    Buddy hasn't created any learning memory logs yet. Try speaking to Buddy first!
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Quiz Log -->
+        <div class="edu-card">
+            <h5 class="fw-bold mb-3" style="color: var(--text-primary);"><i class="fa-solid fa-clipboard-question text-secondary me-2"></i>Recent Quiz Scores</h5>
+            {% if quizzes %}
+                <div class="table-responsive">
+                    <table class="table align-middle border-0 mb-0" style="color: var(--text-primary);">
+                        <thead class="rounded-3">
+                            <tr style="font-size: 0.85rem; border-color: var(--border-color) !important;">
+                                <th class="text-muted">Subject</th>
+                                <th class="text-muted">Score</th>
+                                <th class="text-muted">Difficulty</th>
+                                <th class="text-muted">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for quiz in quizzes %}
+                            <tr style="font-size: 0.9rem; border-color: var(--border-color) !important;">
+                                <td><strong class="text-primary">{{ quiz.subject|title }}</strong></td>
+                                <td>
+                                    <span class="badge rounded-pill {% if quiz.score >= 80 %}bg-success{% elif quiz.score >= 50 %}bg-warning{% else %}bg-danger{% endif %} text-white">
+                                        {{ quiz.score }}%
+                                    </span>
+                                </td>
+                                <td><span class="text-muted">{{ quiz.difficulty_used|title }}</span></td>
+                                <td style="font-size: 0.8rem;" class="text-muted">{{ quiz.started_at|date:"M d, Y" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-3 text-muted" style="font-size: 0.85rem;">
+                    No quizzes taken yet.
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if topics %}
+<script>
+    const ctx = document.getElementById('masteryChart').getContext('2d');
+    const topicsData = [
+        {% for t in topics %}
+            { topic: "{{ t.topic }}", score: {{ t.mastery_score }} },
+        {% endfor %}
+    ];
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: topicsData.map(d => d.topic),
+            datasets: [{
+                label: 'Mastery Level (%)',
+                data: topicsData.map(d => d.score),
+                backgroundColor: 'rgba(108, 92, 231, 0.75)',
+                borderColor: 'rgba(108, 92, 231, 1)',
+                borderWidth: 1.5,
+                borderRadius: 8,
+                barThickness: 24
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

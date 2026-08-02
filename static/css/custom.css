@@ -1,0 +1,428 @@
+/* EduVerse AI Premium Design System */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* Default Theme Tokens: Dark Mode (Primary Showcase) */
+:root {
+    --primary: #6C5CE7;
+    --primary-light: rgba(108, 92, 231, 0.1);
+    --secondary: #8B5CF6;
+    --secondary-light: rgba(139, 92, 246, 0.1);
+    --accent: #3B82F6;
+    --accent-light: rgba(59, 130, 246, 0.1);
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --bg-main: #0F172A;
+    --bg-card: #1E293B;
+    --text-primary: #FFFFFF;
+    --text-secondary: #F3F4F6;
+    --text-muted: #D1D5DB;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-radius: 16px;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.25);
+    --shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Light Theme Overrides (High Contrast) */
+body.theme-light {
+    --bg-main: #F8FAFC;
+    --bg-card: #FFFFFF;
+    --text-primary: #000000;
+    --text-secondary: #1F2937;
+    --text-muted: #4B5563;
+    --border-color: rgba(0, 0, 0, 0.05);
+    --primary-light: rgba(108, 92, 231, 0.06);
+    --secondary-light: rgba(139, 92, 246, 0.06);
+    --accent-light: rgba(59, 130, 246, 0.06);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.03);
+    --shadow-hover: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* Playful Theme Overrides (Magic Kingdom) */
+body.theme-playful {
+    --bg-main: #1E1B4B;
+    --bg-card: #2E1065;
+    --text-primary: #FDF4FF;
+    --text-secondary: #E9D5FF;
+    --text-muted: #D8B4FE;
+    --border-color: #4C1D95;
+    --primary-light: rgba(167, 139, 250, 0.1);
+    --secondary-light: rgba(192, 132, 252, 0.1);
+    --accent-light: rgba(251, 191, 36, 0.1);
+}
+
+/* Dyslexia-friendly reading mode */
+body.font-dyslexia {
+    font-family: 'OpenDyslexic', 'Comic Sans MS', sans-serif !important;
+}
+
+/* General Layout Reset */
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Strict Spacing System (8px Grid Rules) */
+.m-8   { margin: 8px !important; }
+.m-16  { margin: 16px !important; }
+.m-24  { margin: 24px !important; }
+.m-32  { margin: 32px !important; }
+.m-40  { margin: 40px !important; }
+.m-48  { margin: 48px !important; }
+
+.p-8   { padding: 8px !important; }
+.p-16  { padding: 16px !important; }
+.p-24  { padding: 24px !important; }
+.p-32  { padding: 32px !important; }
+.p-40  { padding: 40px !important; }
+.p-48  { padding: 48px !important; }
+
+/* Typography Styles */
+.hero-title {
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -1px;
+    color: var(--text-primary);
+}
+
+.page-title {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+}
+
+.card-title {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text-primary);
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.body-text {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.caption-text {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+/* Premium Card System (.edu-card) */
+.edu-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.edu-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: rgba(108, 92, 231, 0.3);
+}
+
+/* Premium Interactive Actions Tiles */
+.action-tile {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 16px 20px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.action-tile:hover {
+    transform: scale(1.02);
+    background-color: var(--primary-light);
+    border-color: var(--primary);
+}
+
+/* Forms controls styling overrides */
+.form-control, .form-select {
+    background-color: var(--bg-card);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 15px;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+}
+
+/* Buttons System */
+.btn-primary-edu {
+    background-color: var(--primary);
+    color: #FFFFFF !important;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 28px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+}
+
+.btn-primary-edu:hover {
+    background-color: #5b4cc4;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(108, 92, 231, 0.3);
+}
+
+.btn-secondary-edu {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border: 1.5px solid var(--border-color);
+    border-radius: 50px;
+    padding: 12px 28px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary-edu:hover {
+    background-color: var(--border-color);
+    border-color: var(--text-muted);
+}
+
+/* Audio visualizer pulser */
+.audio-visualizer-wave {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 20px;
+}
+
+.audio-visualizer-bar {
+    width: 3px;
+    height: 4px;
+    background-color: var(--primary);
+    border-radius: 3px;
+    animation: wave-bounce 1s ease-in-out infinite;
+}
+
+@keyframes wave-bounce {
+    0%, 100% { height: 4px; }
+    50% { height: 16px; }
+}
+
+/* Workspace Specific Layouts */
+.workspace-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+}
+
+.workspace-main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: var(--bg-main);
+    overflow-y: auto;
+}
+
+.workspace-content {
+    flex: 1;
+    padding: 32px;
+}
+
+/* AI Buddy Dialogs bubbles */
+.message-bubble {
+    max-width: 70%;
+    padding: 16px 20px;
+    border-radius: 18px;
+    line-height: 1.6;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.message-bubble.child {
+    background-color: var(--primary);
+    color: #FFFFFF;
+    border-bottom-right-radius: 4px;
+    align-self: flex-end;
+}
+
+.message-bubble.ai {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+}
+
+/* Audio Mic pulsing glow */
+.mic-button-glow {
+    position: relative;
+    background-color: var(--primary);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.mic-button-glow.active {
+    background-color: var(--danger);
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0.15);
+    animation: mic-pulse 1.5s infinite;
+}
+
+@keyframes mic-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+/* Dashboard Metrics indicators */
+.metric-pill {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--bg-card);
+    border: 1.5px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.metric-pill i {
+    margin-right: 6px;
+}
+
+.metric-pill.xp { color: var(--primary); }
+.metric-pill.coins { color: var(--warning); }
+.metric-pill.streak { color: var(--danger); }
+
+/* Double Column Chat Workspaces */
+.chat-workspace-grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 24px;
+    height: calc(100vh - 160px);
+}
+
+@media (max-width: 992px) {
+    .chat-workspace-grid {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+}
+
+/* Spaced repetition flipping visual flashcard deck */
+.spaced-flashcard {
+    perspective: 1000px;
+    width: 100%;
+    height: 200px;
+    position: relative;
+}
+
+.spaced-flashcard-inner {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.spaced-flashcard-inner.flipped {
+    transform: rotateY(180deg);
+}
+
+.spaced-flashcard-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: var(--border-radius);
+    border: 1.5px solid var(--border-color);
+    background-color: var(--bg-card);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.spaced-flashcard-back {
+    transform: rotateY(180deg);
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+    color: var(--text-primary);
+}
+
+/* Roadmaps Node items styling */
+.roadmap-stage-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 4px solid var(--bg-card);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.roadmap-stage-btn:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: var(--shadow-md);
+}
+
+.roadmap-stage-btn.completed { background-color: var(--success); }
+.roadmap-stage-btn.unlocked { background-color: var(--primary); }
+.roadmap-stage-btn.locked { background-color: var(--text-muted); cursor: not-allowed; }

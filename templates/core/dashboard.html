@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Today's Adventure - EduVerse AI{% endblock %}
+
+{% block content %}
+<!-- Welcome Hero Banner -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="edu-card border-0 p-4 text-white d-flex align-items-center justify-content-between" 
+             style="background: linear-gradient(135deg, var(--primary), var(--secondary)); min-height: 140px; box-shadow: var(--shadow-md);">
+            <div class="p-2">
+                <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1 mb-2 fw-bold" style="font-size: 0.75rem;">TODAY'S MISSION</span>
+                <h1 class="fw-bold mb-1" style="font-size: 2.2rem; letter-spacing: -1px;">Hey {{ request.user.username|title }}, ready to explore? 🚀</h1>
+                <p class="mb-0 text-white text-opacity-90 body-text" style="font-size: 1rem;">Complete your challenges today to unlock magic avatars and earn extra coins!</p>
+            </div>
+            <div class="d-none d-md-block fs-1 pe-3" style="opacity: 0.25; font-size: 4rem !important;">
+                <i class="fa-solid fa-rocket"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column: Mission Checklist & Learning Path -->
+    <div class="col-lg-7 mb-4">
+        
+        <!-- Today's Mission Card -->
+        <div class="edu-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="card-title mb-1"><i class="fa-solid fa-list-check text-primary me-2"></i>My Daily Challenges</h5>
+                    <p class="caption-text mb-0">Check these off to boost your profile twin stats!</p>
+                </div>
+                <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem;">Daily Challenges</span>
+            </div>
+            
+            <div id="plan-items-container" class="d-flex flex-column gap-2 mt-3">
+                {% if plan.items.all %}
+                    {% for item in plan.items.all %}
+                        <div class="d-flex align-items-center justify-content-between p-3 rounded-4 border {% if item.is_done %}opacity-75{% endif %}" 
+                             id="item-row-{{ item.id }}" style="background-color: var(--primary-light); border-color: var(--border-color) !important;">
+                            <div class="d-flex align-items-center">
+                                <input class="form-check-input me-3" type="checkbox" id="task-{{ item.id }}" {% if item.is_done %}checked disabled{% endif %} 
+                                       onclick="checkOffTask({{ item.id }})" style="width: 22px; height: 22px; cursor: pointer; border-radius: 6px; border-color: var(--primary);">
+                                <label class="form-check-label fw-bold {% if item.is_done %}text-decoration-line-through text-muted{% endif %}" 
+                                       for="task-{{ item.id }}" id="label-{{ item.id }}" style="font-size: 1rem; color: var(--text-primary);">
+                                    {{ item.task }}
+                                </label>
+                            </div>
+                            <span class="badge bg-primary rounded-pill px-3 py-1" style="font-size: 0.75rem;">+{{ item.xp_reward }} XP</span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center py-3">No challenges for today!</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Learning Pathway Card -->
+        <div class="edu-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="card-title mb-1"><i class="fa-solid fa-compass text-secondary me-2"></i>My Learning Pathway</h5>
+                    <p class="caption-text mb-0">Follow the path nodes to study topics with Buddy.</p>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-secondary-edu btn-sm dropdown-toggle rounded-pill px-3" type="button" id="pathSubject" data-bs-toggle="dropdown" aria-expanded="false">
+                        Math Adventures
+                    </button>
+                    <ul class="dropdown-menu border-0 shadow-lg p-2" aria-labelledby="pathSubject" style="background-color: var(--bg-card); border: 1.5px solid var(--border-color) !important; border-radius: var(--border-radius);">
+                        <li><a class="dropdown-item rounded-3" href="?subject=math" style="color: var(--text-primary);">Math Adventures</a></li>
+                        <li><a class="dropdown-item rounded-3" href="?subject=science" style="color: var(--text-primary);">Science & Space</a></li>
+                        <li><a class="dropdown-item rounded-3" href="?subject=english" style="color: var(--text-primary);">English & Stories</a></li>
+                        <li><a class="dropdown-item rounded-3" href="?subject=coding" style="color: var(--text-primary);">Code Adventures</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Vertical Journey Map -->
+            <div class="journey-map">
+                <div class="journey-line"></div>
+                <div id="journey-nodes-container">
+                    <!-- Seeding nodes dynamically -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Right Column: Buddy AI Widget, Recommendations, Achievements -->
+    <div class="col-lg-5 mb-4">
+        
+        <!-- Buddy AI Quick Widget -->
+        <div class="edu-card mb-4 text-center">
+            <h5 class="card-title text-start mb-3"><i class="fa-solid fa-face-smile text-secondary me-2"></i>My Buddy AI Tutor</h5>
+            
+            <div class="p-3 rounded-4 mb-3" style="background-color: var(--primary-light); border: 1px solid var(--border-color);">
+                <div class="floating-avatar fs-1 mb-2">🤖</div>
+                <h6 class="fw-bold mb-1" style="color: var(--text-primary);">Buddy is online!</h6>
+                <p class="caption-text mb-3">Buddy knows your style and is ready to teach you today.</p>
+                <a href="{% url 'tutor:buddy' %}" class="btn btn-primary-edu py-2 px-4 shadow-sm w-100">
+                    Talk to Buddy <i class="fa-solid fa-comments ms-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Digital Twin Recommendation Tile -->
+        {% if recommended_action %}
+        <div class="edu-card mb-4" style="background: linear-gradient(135deg, rgba(108, 92, 231, 0.05), rgba(139, 92, 246, 0.05)); border-color: var(--primary) !important;">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 mb-2 fw-bold" style="font-size: 0.72rem;">LEARNING TWIN RECOMMENDATION</span>
+                    <h5 class="card-title mb-1" style="color: var(--text-primary);">{{ recommended_action.title }}</h5>
+                </div>
+                <div class="fs-2 text-primary" style="opacity: 0.4;"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            </div>
+            
+            <p class="body-text mb-4" style="font-size: 0.95rem; color: var(--text-secondary);">
+                {{ recommended_action.reason }}
+            </p>
+            
+            <a href="{% url 'tutor:buddy' %}?topic={{ recommended_action.topic }}&subject={{ recommended_action.subject }}" 
+               class="btn btn-primary-edu w-100 py-2">
+                Begin Adventure! <i class="fa-solid fa-circle-play ms-2"></i>
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Trophy Achievements Cabinet -->
+        <div class="edu-card">
+            <h5 class="card-title mb-3"><i class="fa-solid fa-trophy text-warning me-2"></i>My Achievements</h5>
+            <p class="caption-text mb-4">View badges you unlocked by completing tutoring lessons.</p>
+            
+            <div id="dashboard-achievements" class="d-flex flex-column gap-3">
+                <!-- Seeding default badge view if profile has achievements -->
+                {% if profile.achievements.all %}
+                    {% for badge in profile.achievements.all|slice:":2" %}
+                        <div class="d-flex align-items-center p-3 rounded-4" style="background-color: var(--accent-light); border: 1px solid var(--border-color);">
+                            <div class="bg-white rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; min-width: 44px;">
+                                <i class="fa-solid {{ badge.icon_class }} fs-4 text-warning"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0" style="font-size: 0.95rem; color: var(--text-primary);">{{ badge.badge_name }}</h6>
+                                <p class="caption-text mb-0" style="font-size: 0.8rem;">{{ badge.description }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted small text-center py-3 mb-0">No achievements unlocked yet. Keep studying!</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // AJAX completions for planner checklist
+    const checkOffTask = (itemId) => {
+        const checkbox = document.getElementById(`task-${itemId}`);
+        const label = document.getElementById(`label-${itemId}`);
+        const row = document.getElementById(`item-row-${itemId}`);
+        
+        if (!checkbox.checked) return;
+
+        fetch(`/activities/planner/complete/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                checkbox.disabled = true;
+                label.classList.add('text-decoration-line-through', 'text-muted');
+                row.classList.add('opacity-75');
+                
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success border-0 position-fixed bottom-0 end-0 m-4 z-3';
+                alertDiv.innerHTML = `🌟 <strong>+${data.xp_gained} XP</strong> and <strong>+${data.coins_gained} Coins</strong> added!`;
+                alertDiv.style.borderRadius = 'var(--border-radius)';
+                alertDiv.style.boxShadow = 'var(--shadow-md)';
+                document.body.appendChild(alertDiv);
+                
+                setTimeout(() => {
+                    alertDiv.remove();
+                    window.location.reload();
+                }, 1500);
+            }
+        })
+        .catch(err => {
+            console.error("Error complete task:", err);
+            checkbox.checked = false;
+        });
+    };
+
+    // Load visual node roadmaps dynamically
+    document.addEventListener('DOMContentLoaded', () => {
+        const container = document.getElementById('journey-nodes-container');
+        
+        const subjects = {
+            'math': [
+                { title: 'Counting Stars', desc: 'Numbers 1 to 20', order: 1, status: 'completed', icon: 'fa-star' },
+                { title: 'Visual Fractions', desc: 'Parts of a cake!', order: 2, status: 'unlocked', icon: 'fa-pie-chart' },
+                { title: 'Geometry Shapes', desc: 'Angles and polygons', order: 3, status: 'locked', icon: 'fa-shapes' }
+            ],
+            'science': [
+                { title: 'The Solar System', desc: 'Planet orbits tour', order: 1, status: 'unlocked', icon: 'fa-globe-americas' },
+                { title: 'Water Cycles', desc: 'Clouds, rain and oceans', order: 2, status: 'locked', icon: 'fa-cloud-showers-water' }
+            ],
+            'english': [
+                { title: 'Word Magic', desc: 'Verbs and nouns', order: 1, status: 'unlocked', icon: 'fa-spell-check' }
+            ],
+            'coding': [
+                { title: 'HTML Basics', desc: 'Make your first webpage', order: 1, status: 'unlocked', icon: 'fa-code' }
+            ]
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        let activeSubject = urlParams.get('subject') || 'math';
+        if (!subjects[activeSubject]) activeSubject = 'math';
+
+        const btn = document.getElementById('pathSubject');
+        const subjectNames = { 'math': 'Math Adventures', 'science': 'Science & Space', 'english': 'English & Stories', 'coding': 'Code Adventures' };
+        btn.textContent = subjectNames[activeSubject];
+
+        const list = subjects[activeSubject];
+        container.innerHTML = '';
+        
+        list.forEach(node => {
+            const nodeDiv = document.createElement('div');
+            nodeDiv.className = 'journey-node';
+            
+            let btnClass = 'locked';
+            let iconCode = '<i class="fa-solid fa-lock"></i>';
+            let onclickStr = '';
+
+            if (node.status === 'completed') {
+                btnClass = 'completed';
+                iconCode = '<i class="fa-solid fa-circle-check"></i>';
+                onclickStr = `location.href="/tutor/buddy/?topic=${encodeURIComponent(node.title)}&subject=${activeSubject}"`;
+            } else if (node.status === 'unlocked') {
+                btnClass = 'unlocked';
+                iconCode = `<i class="fa-solid ${node.icon || 'fa-play'}"></i>`;
+                onclickStr = `location.href="/tutor/buddy/?topic=${encodeURIComponent(node.title)}&subject=${activeSubject}"`;
+            }
+            
+            nodeDiv.innerHTML = `
+                <div class="roadmap-stage-btn ${btnClass}" onclick="${onclickStr}">
+                    ${iconCode}
+                </div>
+                <div class="node-title-card" style="background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
+                    <div class="fw-bold" style="font-size: 0.95rem;">${node.title}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">${node.desc}</div>
+                </div>
+            `;
+            container.appendChild(nodeDiv);
+        });
+    });
+</script>
+{% endblock %}

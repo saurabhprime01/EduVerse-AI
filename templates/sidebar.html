@@ -1,0 +1,109 @@
+{% load static %}
+<div class="d-flex flex-column flex-shrink-0 p-4 border-end" style="width: 280px; height: 100vh; background-color: var(--bg-card); border-color: var(--border-color) !important;">
+    
+    <!-- Brand -->
+    <a href="{% url 'core:dashboard' %}" class="d-flex align-items-center mb-4 me-md-auto text-decoration-none">
+        <i class="fa-solid fa-graduation-cap fs-2 text-primary me-2"></i>
+        <span class="sidebar-brand" style="font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">EduVerse AI</span>
+    </a>
+    
+    <!-- User Avatar & Identity twin status -->
+    {% if learner_profile %}
+    <div class="text-center mb-4 p-3 rounded-4" style="background-color: var(--primary-light); border: 1px solid var(--border-color);">
+        <img src="{% static 'img/' %}{{ learner_profile.avatar }}.png" 
+             onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed={{ learner_profile.user.username }}';"
+             alt="Twin Avatar" class="rounded-circle floating-avatar bg-white border border-2 border-primary mb-2" style="width: 64px; height: 64px;">
+        <h6 class="mb-0 fw-bold" style="color: var(--text-primary);">{{ learner_profile.user.username|title }}</h6>
+        <span class="badge rounded-pill mt-2 py-1 px-3" style="font-size: 0.75rem; background-color: var(--primary); color: #ffffff;">
+            Level {{ learner_profile.xp|default:0|divisibleby:100|yesno:"1,1" }} Twin
+        </span>
+    </div>
+    {% else %}
+    <div class="text-center mb-4 p-3 rounded-4" style="background-color: var(--primary-light); border: 1px solid var(--border-color);">
+        <i class="fa-solid fa-circle-user fs-1 text-muted mb-2"></i>
+        <h6 class="mb-0 fw-bold" style="color: var(--text-primary);">Guest Learner</h6>
+        <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-primary-edu mt-2 py-1 px-3" style="font-size: 0.8rem;">Sign In</a>
+    </div>
+    {% endif %}
+
+    <!-- Sidebar Navigation links -->
+    <ul class="nav nav-pills flex-column mb-auto gap-1">
+        <li class="nav-item">
+            <a href="{% url 'core:dashboard' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span>Adventure Map</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'tutor:buddy' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'buddy' %}active{% endif %}">
+                <i class="fa-solid fa-face-smile"></i>
+                <span>Buddy AI Tutor</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'tutor:journey' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'journey' %}active{% endif %}">
+                <i class="fa-solid fa-compass"></i>
+                <span>Learning Journey</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'activities:quiz_list' %}" class="sidebar-nav-link {% if 'quiz' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fa-solid fa-award"></i>
+                <span>Adaptive Quizzes</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'activities:flashcard_list' %}" class="sidebar-nav-link {% if 'flashcard' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fa-solid fa-images"></i>
+                <span>Magic Cards</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'activities:planner' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'planner' %}active{% endif %}">
+                <i class="fa-solid fa-calendar-check"></i>
+                <span>My Study Plan</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'activities:codelab' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'codelab' %}active{% endif %}">
+                <i class="fa-solid fa-laptop-code"></i>
+                <span>Code Lab</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'gamification:shop' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'shop' %}active{% endif %}">
+                <i class="fa-solid fa-store"></i>
+                <span>Coin Shop</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'accounts:parent_dashboard' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'parent_dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-people-roof"></i>
+                <span>Parent Room</span>
+            </a>
+        </li>
+    </ul>
+
+    <hr style="color: var(--border-color); margin: 16px 0;">
+    
+    <!-- User Settings & Log Out -->
+    <ul class="nav nav-pills flex-column gap-1">
+        <li>
+            <a href="{% url 'accounts:settings' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                <i class="fa-solid fa-sliders"></i>
+                <span>Settings</span>
+            </a>
+        </li>
+        {% if request.user.is_authenticated %}
+        <li>
+            <form action="{% url 'accounts:logout' %}" method="post" class="d-inline w-100">
+                {% csrf_token %}
+                <button type="submit" class="sidebar-nav-link w-100 border-0 bg-transparent text-start" style="padding: 12px 20px;">
+                    <i class="fa-solid fa-right-from-bracket text-danger"></i>
+                    <span class="text-danger">Log Out</span>
+                </button>
+            </form>
+        </li>
+        {% endif %}
+    </ul>
+</div>

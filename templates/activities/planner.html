@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Plan - EduVerse AI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Main Plan Checklist -->
+    <div class="col-lg-8 mb-4 mx-auto">
+        <div class="edu-card">
+            
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+                <div class="d-flex align-items-center mb-3 mb-md-0">
+                    <div class="bg-primary-light p-3 rounded-circle me-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                        <i class="fa-solid fa-calendar-day fs-3"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0" style="color: var(--text-primary);">Daily Learning Adventure</h3>
+                        <p class="body-text text-muted mb-0">Check off your tasks today to earn extra coins!</p>
+                    </div>
+                </div>
+                <!-- Date -->
+                <span class="badge bg-primary text-white rounded-pill px-3 py-2 fw-bold" style="font-size: 0.85rem;">
+                    {{ plan.target_date|date:"F d, Y" }}
+                </span>
+            </div>
+
+            <!-- List items -->
+            <div id="planner-tasks-list" class="d-flex flex-column gap-3">
+                {% if plan.items.all %}
+                    {% for item in plan.items.all %}
+                        <div class="d-flex align-items-center justify-content-between p-3 rounded-4 border {% if item.is_done %}opacity-75{% endif %}" id="item-box-{{ item.id }}" style="background-color: var(--primary-light); border-color: var(--border-color) !important; transition: all 0.2s ease;">
+                            <div class="d-flex align-items-center">
+                                <input class="form-check-input me-3" type="checkbox" id="plan-task-{{ item.id }}" {% if item.is_done %}checked disabled{% endif %} 
+                                       onclick="completePlannerTask({{ item.id }})" style="width: 24px; height: 24px; cursor: pointer; border-radius: 6px; border-color: var(--primary);">
+                                <label class="form-check-label fw-bold {% if item.is_done %}text-decoration-line-through text-muted{% endif %}" for="plan-task-{{ item.id }}" id="plan-label-{{ item.id }}" style="font-size: 1.05rem; color: var(--text-primary);">
+                                    {{ item.task }}
+                                </label>
+                            </div>
+                            <span class="badge bg-primary rounded-pill px-3 py-1" style="font-size: 0.75rem;">+{{ item.xp_reward }} XP</span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fa-solid fa-folder-open fs-1 mb-2 d-block text-muted opacity-50"></i>
+                        No planner challenges set for today.
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const completePlannerTask = (itemId) => {
+        const checkbox = document.getElementById(`plan-task-${itemId}`);
+        const label = document.getElementById(`plan-label-${itemId}`);
+        const box = document.getElementById(`item-box-${itemId}`);
+        
+        if (!checkbox.checked) return;
+
+        fetch(`complete/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                checkbox.disabled = true;
+                label.classList.add('text-decoration-line-through', 'text-muted');
+                box.classList.add('opacity-75');
+                
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success border-0 position-fixed bottom-0 end-0 m-4 z-3';
+                alertDiv.innerHTML = `🌟 <strong>+${data.xp_gained} XP</strong> and <strong>+${data.coins_gained} Coins</strong> added!`;
+                alertDiv.style.borderRadius = 'var(--border-radius)';
+                alertDiv.style.boxShadow = 'var(--shadow-md)';
+                document.body.appendChild(alertDiv);
+                
+                setTimeout(() => {
+                    alertDiv.remove();
+                    window.location.reload();
+                }, 1500);
+            }
+        })
+        .catch(err => {
+            console.error("AJAX Error:", err);
+            checkbox.checked = false;
+        });
+    };
+</script>
+{% endblock %}

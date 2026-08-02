@@ -1,0 +1,75 @@
+{% load static %}
+<div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+    
+    <!-- Left Hand: Greeting & Welcome -->
+    <div class="d-flex align-items-center">
+        <h3 class="fw-bold mb-0 me-2" style="color: var(--text-primary); letter-spacing: -0.5px;">
+            {% if request.user.is_authenticated %}
+                Hi, {{ request.user.username|title }}! 👋
+            {% else %}
+                Welcome to EduVerse!
+            {% endif %}
+        </h3>
+        <span class="text-muted d-none d-md-inline caption-text" style="font-size: 0.95rem;">
+            Ready for today's learning adventure?
+        </span>
+    </div>
+
+    <!-- Right Hand: Live Stats Dashboard & Accessibility Utilities -->
+    <div class="d-flex align-items-center gap-3">
+        
+        <!-- Live Counters (Visible only if child logged in) -->
+        {% if learner_profile %}
+            <div class="metric-pill xp" title="Your XP Points!" style="background-color: var(--primary-light); border-color: rgba(108, 92, 231, 0.15); color: var(--primary);">
+                <i class="fa-solid fa-star"></i>
+                <span>{{ learner_profile.xp }} XP</span>
+            </div>
+            
+            <div class="metric-pill coins" title="Spend your coins in the Shop!" style="background-color: var(--accent-light); border-color: rgba(59, 130, 246, 0.15); color: var(--accent);">
+                <i class="fa-solid fa-coins"></i>
+                <span>{{ learner_profile.coins }} 🪙</span>
+            </div>
+            
+            <div class="metric-pill streak" title="Daily Streak Fire!" style="background-color: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.15); color: var(--danger);">
+                <i class="fa-solid fa-fire"></i>
+                <span>{{ learner_profile.streak }} Days</span>
+            </div>
+        {% endif %}
+
+        <!-- Accessibility Dyslexia Mode Toggle -->
+        <button onclick="toggleDyslexia()" class="btn btn-light rounded-circle" title="Reading Helper (Dyslexia Friendly Font)" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; background-color: var(--primary-light); border: 1.5px solid var(--border-color); color: var(--primary);">
+            <i class="fa-solid fa-eye"></i>
+        </button>
+
+        <!-- Notification Center -->
+        <div class="dropdown">
+            <button class="btn btn-light rounded-circle position-relative" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; background-color: var(--primary-light); border: 1.5px solid var(--border-color); color: var(--secondary);">
+                <i class="fa-solid fa-bell"></i>
+                {% if learner_profile and learner_profile.notifications.all %}
+                    {% with unread_count=learner_profile.notifications.all.count %}
+                        {% if unread_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem; border: 2px solid var(--bg-card);">
+                                {{ unread_count }}
+                            </span>
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end p-3 border-0 shadow-lg" aria-labelledby="notifDropdown" style="width: 320px; max-height: 400px; overflow-y: auto; background-color: var(--bg-card); border: 1.5px solid var(--border-color) !important; border-radius: var(--border-radius);">
+                <li class="px-2 py-1 mb-2"><h6 class="fw-bold mb-0" style="color: var(--text-primary);">Notifications</h6></li>
+                <li><hr class="dropdown-divider" style="color: var(--border-color);"></li>
+                {% if learner_profile and learner_profile.notifications.all %}
+                    {% for notif in learner_profile.notifications.all|slice:":5" %}
+                        <li class="p-3 mb-2 rounded-4" style="font-size: 0.88rem; background-color: var(--primary-light); border: 1px solid var(--border-color);">
+                            <div class="fw-bold text-primary mb-1">{{ notif.title }}</div>
+                            <div class="text-muted" style="color: var(--text-secondary) !important;">{{ notif.message }}</div>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="text-center p-3 text-muted caption-text">No notifications right now! 😊</li>
+                {% endif %}
+            </ul>
+        </div>
+
+    </div>
+</div>

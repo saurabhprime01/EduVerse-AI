@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Learning Journey - EduVerse AI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-9 mx-auto">
+        <!-- Journey Map Full Card -->
+        <div class="edu-card text-center p-5">
+            
+            <div class="mb-5">
+                <span class="badge bg-primary-light text-primary rounded-pill px-3 py-1 mb-2 fw-bold" style="font-size: 0.75rem;">MY ADVENTURE</span>
+                <h2 class="fw-bold hero-title mb-2">My Learning Journey Map</h2>
+                <p class="body-text text-muted">Follow the track, unlock topics, and win stars by talk tutoring with Buddy!</p>
+            </div>
+
+            <!-- Subject Path Switcher tabs -->
+            <div class="d-flex justify-content-center gap-2 mb-5 flex-wrap">
+                <a href="?subject=math" class="btn btn-secondary-edu px-4 py-2 border-0 shadow-sm" id="tab-math">
+                    <i class="fa-solid fa-calculator me-2"></i>Math Path
+                </a>
+                <a href="?subject=science" class="btn btn-secondary-edu px-4 py-2 border text-muted" id="tab-science">
+                    <i class="fa-solid fa-space-shuttle me-2"></i>Science Path
+                </a>
+                <a href="?subject=english" class="btn btn-secondary-edu px-4 py-2 border text-muted" id="tab-english">
+                    <i class="fa-solid fa-book-open me-2"></i>English Path
+                </a>
+                <a href="?subject=coding" class="btn btn-secondary-edu px-4 py-2 border text-muted" id="tab-coding">
+                    <i class="fa-solid fa-laptop-code me-2"></i>Code Path
+                </a>
+            </div>
+
+            <!-- Vertical Roadmap -->
+            <div class="journey-map" style="max-width: 480px; margin: 0 auto; padding: 40px 0;">
+                <div class="journey-line" style="width: 4px; background: var(--border-color);"></div>
+                <div id="full-journey-nodes">
+                    <!-- Nodes loaded via JavaScript -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const container = document.getElementById('full-journey-nodes');
+        
+        const pathways = {
+            'math': [
+                { title: 'Numbers 1-20', desc: 'Counting stars and candies', status: 'completed', icon: 'fa-star' },
+                { title: 'Visual Fractions', desc: 'Learn parts using pizzas', status: 'unlocked', icon: 'fa-pie-chart' },
+                { title: 'Geometry Shapes', desc: 'Identify triangles and circles', status: 'locked', icon: 'fa-shapes' },
+                { title: 'Super Division', desc: 'Equally sharing cookies', status: 'locked', icon: 'fa-divide' }
+            ],
+            'science': [
+                { title: 'The Solar System', desc: 'Explore Mars, Venus, and Jupiter', status: 'unlocked', icon: 'fa-globe-americas' },
+                { title: 'Water States', desc: 'Ice, liquid water, and vapor steam', status: 'locked', icon: 'fa-tint' },
+                { title: 'Forces & Gravity', desc: 'Magnet magnetism and drops', status: 'locked', icon: 'fa-apple-whole' }
+            ],
+            'english': [
+                { title: 'Nouns & Verbs', desc: 'Grammar building blocks', status: 'unlocked', icon: 'fa-spell-check' },
+                { title: 'Story Telling', desc: 'Drafting your first fairy tale', status: 'locked', icon: 'fa-book-open' }
+            ],
+            'coding': [
+                { title: 'HTML Web Tags', desc: 'Build headers and links', status: 'unlocked', icon: 'fa-code' },
+                { title: 'Logical Loops', desc: 'Repeating instruction blocks', status: 'locked', icon: 'fa-redo' }
+            ]
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        let activeSub = urlParams.get('subject') || 'math';
+        if (!pathways[activeSub]) activeSub = 'math';
+
+        // Styling tab switchers
+        document.querySelectorAll('[id^="tab-"]').forEach(btn => {
+            btn.className = "btn btn-secondary-edu px-4 py-2 border text-muted";
+        });
+        const activeTab = document.getElementById(`tab-${activeSub}`);
+        if (activeTab) {
+            activeTab.className = "btn btn-primary-edu px-4 py-2 border-0 shadow-sm";
+        }
+
+        const nodes = pathways[activeSub];
+        container.innerHTML = '';
+
+        nodes.forEach((node, idx) => {
+            const nodeDiv = document.createElement('div');
+            nodeDiv.className = 'journey-node';
+            
+            let btnClass = 'locked';
+            let iconCode = '<i class="fa-solid fa-lock"></i>';
+            let onclickStr = '';
+
+            if (node.status === 'completed') {
+                btnClass = 'completed';
+                iconCode = '<i class="fa-solid fa-circle-check"></i>';
+                onclickStr = `location.href="/tutor/buddy/?topic=${encodeURIComponent(node.title)}&subject=${activeSub}"`;
+            } else if (node.status === 'unlocked') {
+                btnClass = 'unlocked';
+                iconCode = `<i class="fa-solid ${node.icon}"></i>`;
+                onclickStr = `location.href="/tutor/buddy/?topic=${encodeURIComponent(node.title)}&subject=${activeSub}"`;
+            }
+
+            nodeDiv.innerHTML = `
+                <div class="roadmap-stage-btn ${btnClass}" onclick="${onclickStr}">
+                    ${iconCode}
+                </div>
+                <div class="node-title-card" style="background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
+                    <div class="fw-bold" style="font-size: 0.95rem;">${node.title}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">${node.desc}</div>
+                </div>
+            `;
+            container.appendChild(nodeDiv);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Magic Flashcards - EduVerse AI{% endblock %}
+
+{% block content %}
+<div class="row">
+    
+    <!-- Left Column: Spaced Repetition Review Queue -->
+    <div class="col-lg-6 mb-4 mx-auto">
+        <div class="edu-card text-center p-4">
+            
+            <div class="mb-4">
+                <span class="badge bg-secondary-light text-secondary rounded-pill px-3 py-1 mb-2 fw-bold" style="font-size: 0.75rem;">SPACED STUDY</span>
+                <h3 class="fw-bold mb-1" style="color: var(--text-primary);">Magic Flashcards</h3>
+                <p class="body-text text-muted">Click a card to flip and view the answer, then rate it to schedule your next review!</p>
+            </div>
+
+            <!-- Review Area -->
+            <div id="review-sandbox" style="min-height: 300px;">
+                {% if cards_to_review %}
+                    {% for card in cards_to_review %}
+                        <div class="review-card-item {% if not forloop.first %}d-none{% endif %}" id="card-item-{{ card.id }}" data-id="{{ card.id }}">
+                            
+                            <!-- 3D Flipping Card -->
+                            <div class="spaced-flashcard mb-4">
+                                <div class="spaced-flashcard-inner" onclick="this.classList.toggle('flipped')">
+                                    
+                                    <!-- Front Face -->
+                                    <div class="spaced-flashcard-face">
+                                        <div class="fs-1 text-primary mb-3">❓</div>
+                                        <h4 class="fw-bold mb-2" style="color: var(--text-primary);">{{ card.front }}</h4>
+                                        <span class="badge bg-transparent text-muted border px-3 py-1" style="font-size: 0.75rem; border-color: var(--border-color) !important;">Click to flip</span>
+                                    </div>
+                                    
+                                    <!-- Back Face -->
+                                    <div class="spaced-flashcard-face spaced-flashcard-back">
+                                        <div class="fs-2 text-secondary mb-3">💡 Answer</div>
+                                        <p class="body-text mb-0 px-2 fw-bold" style="color: var(--text-primary);">{{ card.back }}</p>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Rating options -->
+                            <div class="d-flex justify-content-center gap-2 mb-3">
+                                <button class="btn btn-sm btn-secondary-edu rounded-pill px-3 py-2" onclick="rateCard({{ card.id }}, 1)" style="border-color: var(--danger) !important; color: var(--danger) !important;">
+                                    😢 Forgot (1d)
+                                </button>
+                                <button class="btn btn-sm btn-secondary-edu rounded-pill px-3 py-2" onclick="rateCard({{ card.id }}, 3)" style="border-color: var(--warning) !important; color: var(--warning) !important;">
+                                    😐 Sort of (6d)
+                                </button>
+                                <button class="btn btn-sm btn-secondary-edu rounded-pill px-3 py-2" onclick="rateCard({{ card.id }}, 5)" style="border-color: var(--success) !important; color: var(--success) !important;">
+                                    😄 Easy! (12d)
+                                </button>
+                            </div>
+
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="py-5">
+                        <i class="fa-solid fa-circle-check text-success fs-1 mb-3"></i>
+                        <h5 class="fw-bold">All caught up!</h5>
+                        <p class="body-text text-muted">You have reviewed all scheduled cards for today. Check out 'All Cards' below to study more!</p>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- All Cards Library Grid -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="edu-card">
+            <h5 class="card-title mb-4" style="color: var(--text-primary);"><i class="fa-solid fa-boxes-stacked text-primary me-2"></i>My Flashcard Library</h5>
+            
+            <div class="row">
+                {% for card in all_cards %}
+                    <div class="col-md-4 mb-3">
+                        <div class="p-3 rounded-4 position-relative" style="min-height: 120px; background-color: var(--primary-light); border: 1px solid var(--border-color);">
+                            <div class="fw-bold text-primary mb-1">{{ card.front }}</div>
+                            <p class="body-text mb-0" style="font-size: 0.88rem; color: var(--text-secondary);">{{ card.back|truncatewords:10 }}</p>
+                            <span class="badge bg-white bg-opacity-10 text-muted border border-opacity-15 position-absolute bottom-0 end-0 m-3" style="font-size: 0.7rem; border-color: var(--border-color) !important;">
+                                Interval: {{ card.interval }}d
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const rateCard = (cardId, score) => {
+        fetch(`review/${cardId}/${score}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success border-0 position-fixed bottom-0 end-0 m-4 z-3';
+                alertDiv.innerHTML = `🔥 Card reviewed! +${data.xp_earned} XP earned.`;
+                alertDiv.style.borderRadius = 'var(--border-radius)';
+                alertDiv.style.boxShadow = 'var(--shadow-md)';
+                document.body.appendChild(alertDiv);
+                
+                setTimeout(() => alertDiv.remove(), 1200);
+
+                const currentItem = document.getElementById(`card-item-${cardId}`);
+                currentItem.classList.add('d-none');
+                
+                const nextItem = currentItem.nextElementSibling;
+                if (nextItem && nextItem.classList.contains('review-card-item')) {
+                    nextItem.classList.remove('d-none');
+                } else {
+                    document.getElementById('review-sandbox').innerHTML = `
+                        <div class="py-5">
+                            <i class="fa-solid fa-circle-check text-success fs-1 mb-3"></i>
+                            <h5 class="fw-bold">All Done!</h5>
+                            <p class="body-text text-muted">You completed all scheduled cards! Great job.</p>
+                            <button class="btn btn-primary-edu px-4 py-2 mt-2" onclick="window.location.reload()">Refresh Queue</button>
+                        </div>
+                    `;
+                }
+            }
+        })
+        .catch(err => console.error("Error rating card:", err));
+    };
+</script>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Question Feedback - EduVerse AI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto text-center">
+        <div class="edu-card p-5">
+            
+            {% if is_correct %}
+                <div class="d-inline-flex align-items-center justify-content-center text-white rounded-circle mb-4" 
+                     style="width: 80px; height: 80px; background-color: var(--success); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                    <i class="fa-solid fa-circle-check fs-1"></i>
+                </div>
+                <h2 class="fw-bold mb-2 text-success">Awesome Job! 🌟</h2>
+                <p class="body-text mb-3" style="color: var(--text-secondary);">You locked in the correct answer: <strong>{{ question.correct_answer }}</strong></p>
+                <div class="badge rounded-pill px-3 py-2 mb-4" style="background-color: var(--primary-light); color: var(--primary); font-size: 0.85rem;">+10 XP / +2 Coins Earned!</div>
+            {% else %}
+                <div class="d-inline-flex align-items-center justify-content-center text-white rounded-circle mb-4" 
+                     style="width: 80px; height: 80px; background-color: var(--danger); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">
+                    <i class="fa-solid fa-circle-xmark fs-1"></i>
+                </div>
+                <h2 class="fw-bold mb-2 text-danger">Almost There! 💪</h2>
+                <p class="body-text mb-3" style="color: var(--text-secondary);">You chose: <span class="text-decoration-line-through">{{ question.user_answer }}</span>. The correct answer was: <strong>{{ question.correct_answer }}</strong></p>
+                <div class="badge rounded-pill px-3 py-2 mb-4" style="background-color: var(--primary-light); color: var(--primary); font-size: 0.85rem;">Keep it up! +2 XP awarded for trying.</div>
+            {% endif %}
+
+            <!-- Explanation -->
+            <div class="p-4 rounded-4 text-start mb-4" style="background-color: var(--primary-light); border: 1px solid var(--border-color);">
+                <h6 class="fw-bold mb-2" style="color: var(--text-primary);"><i class="fa-solid fa-graduation-cap me-2 text-primary"></i>Why is this correct?</h6>
+                <p class="mb-0 body-text" style="color: var(--text-secondary);">{{ question.explanation }}</p>
+            </div>
+
+            <!-- Action -->
+            <a href="{% url 'activities:quiz_active' session_id=session.id %}" class="btn btn-primary-edu px-5 py-3 fs-5">
+                Next Question <i class="fa-solid fa-arrow-right ms-2"></i>
+            </a>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

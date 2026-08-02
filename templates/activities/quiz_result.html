@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Quiz Complete - EduVerse AI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-7 mx-auto text-center">
+        <div class="edu-card p-5">
+            
+            <div class="d-inline-flex align-items-center justify-content-center text-white rounded-circle mb-4" 
+                 style="width: 90px; height: 90px; background-color: var(--warning); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); animation: float 3s ease-in-out infinite;">
+                <i class="fa-solid fa-trophy fs-1"></i>
+            </div>
+
+            <h2 class="fw-bold hero-title mb-1" style="color: var(--text-primary);">Quiz Completed! 🎉</h2>
+            <p class="body-text text-muted mb-4">Splendid effort in the <strong>{{ session.subject|title }}</strong> adventure!</p>
+            
+            <div class="my-4">
+                <span class="display-3 fw-bold text-primary" style="font-size: 3.5rem;">{{ session.score|floatformat:0 }}%</span>
+                <div class="text-muted mt-1 fw-bold caption-text">FINAL SCORE</div>
+            </div>
+
+            <!-- Rewards -->
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <div class="p-3 border rounded-4 bg-transparent" style="border-color: var(--border-color) !important;">
+                        <h4 class="fw-bold text-primary mb-0">+{% if session.score == 100 %}50{% else %}30{% endif %}</h4>
+                        <div class="text-muted caption-text">XP Points Gained</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="p-3 border rounded-4 bg-transparent" style="border-color: var(--border-color) !important;">
+                        <h4 class="fw-bold text-accent mb-0">+{% if session.score == 100 %}20{% else %}10{% endif %}</h4>
+                        <div class="text-muted caption-text">Bonus Coins Added</div>
+                    </div>
+                </div>
+            </div>
+
+            {% if session.score == 100 %}
+                <div class="alert alert-success border-0 rounded-4 py-3 mb-4" style="background-color: var(--primary-light); border: 1.5px solid var(--border-color) !important;">
+                    <i class="fa-solid fa-medal text-success fs-4 me-2"></i>
+                    <strong style="color: var(--text-primary);">Perfect Score!</strong> You've unlocked the <strong>Perfect Quiz Badge</strong> frame in the Shop!
+                </div>
+            {% endif %}
+
+            <!-- Redirection -->
+            <a href="{% url 'activities:quiz_list' %}" class="btn btn-primary-edu px-5 py-3 fs-5">
+                Back to Quiz Zone <i class="fa-solid fa-circle-arrow-left ms-2"></i>
+            </a>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

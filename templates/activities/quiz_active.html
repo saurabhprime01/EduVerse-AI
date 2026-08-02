@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Active Quiz - EduVerse AI{% endblock %}
+
+{% block extra_head %}
+<!-- MathJax for rendering LaTeX math formatting -->
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+    .option-card {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid var(--border-color);
+        background-color: var(--bg-card);
+        color: var(--text-primary);
+    }
+    .option-card:hover {
+        border-color: var(--primary);
+        background-color: var(--primary-light);
+    }
+    .option-input:checked + .option-card {
+        border-color: var(--primary);
+        background-color: var(--primary-light);
+        box-shadow: 0 4px 12px rgba(108, 92, 231, 0.15);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        
+        <!-- Progress Card -->
+        <div class="edu-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fw-bold" style="color: var(--primary);">{{ session.subject|title }} Quiz</span>
+                <span class="badge rounded-pill px-3 py-1 fw-bold" style="background-color: var(--primary-light); color: var(--primary); font-size: 0.75rem;">Question {{ question_index }} of 5</span>
+            </div>
+            
+            <div class="progress rounded-pill mb-1" style="height: 8px; background-color: var(--border-color);">
+                <div class="progress-bar" role="progressbar" style="width: {% widthratio question_index 5 100 %}%; background-color: var(--primary);"></div>
+            </div>
+        </div>
+
+        <!-- Question Card -->
+        <div class="edu-card shadow-sm">
+            <h4 class="fw-bold mb-4" style="color: var(--text-primary); line-height: 1.4;">{{ question.question_text }}</h4>
+            
+            <form method="post" action="{% url 'activities:quiz_submit' session_id=session.id question_id=question.id %}">
+                {% csrf_token %}
+                
+                <div class="row">
+                    {% for option in question.options %}
+                        <div class="col-12 mb-3">
+                            <label class="w-100 mb-0">
+                                <input type="radio" name="choice" value="{{ option }}" class="option-input d-none" required>
+                                <div class="card option-card p-3 rounded-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="btn btn-light rounded-circle me-3 fw-bold" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background-color: var(--border-color); color: var(--text-primary); border: none;">
+                                            {{ forloop.counter|yesno:"A,B,C,D" }}
+                                        </div>
+                                        <span class="fs-5 fw-bold">{{ option }}</span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Controls -->
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <button type="button" class="btn btn-secondary-edu rounded-pill px-4" onclick="getHint({{ question.id }})">
+                        <i class="fa-solid fa-lightbulb text-warning me-2"></i>Need a Hint?
+                    </button>
+                    
+                    <button type="submit" class="btn btn-primary-edu px-5 py-3">Lock it in! 🔒</button>
+                </div>
+            </form>
+            
+            <!-- Hint Box -->
+            <div class="alert alert-warning border-0 rounded-4 mt-4 d-none" id="hint-alert" style="background-color: var(--accent-light); border: 1px solid var(--border-color) !important;">
+                <i class="fa-solid fa-circle-question text-warning me-2"></i>
+                <span id="hint-text" class="fw-bold" style="color: var(--text-primary);"></span>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const getHint = (questionId) => {
+        const alert = document.getElementById('hint-alert');
+        const text = document.getElementById('hint-text');
+        
+        fetch(`hint/${questionId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                text.textContent = data.hint;
+                alert.classList.remove('d-none');
+            }
+        })
+        .catch(err => console.error("Error loading hint:", err));
+    };
+
+    document.querySelectorAll('.option-input').forEach(input => {
+        input.addEventListener('change', () => {
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.style.borderColor = 'var(--border-color)';
+                card.style.backgroundColor = 'var(--bg-card)';
+            });
+            const card = input.closest('label').querySelector('.option-card');
+            card.style.borderColor = 'var(--primary)';
+            card.style.backgroundColor = 'var(--primary-light)';
+        });
+    });
+</script>
+{% endblock %}

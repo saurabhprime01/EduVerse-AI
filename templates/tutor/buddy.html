@@ -1,0 +1,388 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tutor Workspace - EduVerse AI{% endblock %}
+
+{% block extra_head %}
+<!-- MathJax for rendering LaTeX math equations -->
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+    /* Glowing visual sandbox styles */
+    #visual-canvas {
+        min-height: 260px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle, rgba(108,92,231,0.03) 0%, rgba(255,255,255,0) 100%);
+        border: 1.5px dashed var(--border-color);
+        border-radius: var(--border-radius);
+        margin-bottom: 16px;
+    }
+    
+    /* Interactive block code style */
+    .scratch-block {
+        background-color: var(--primary);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: bold;
+        display: inline-block;
+        margin: 4px;
+        box-shadow: var(--shadow-sm);
+        border-left: 5px solid var(--secondary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    
+    <!-- Left Column: Conversational Chat Pane (Personal Tutor Workspace) -->
+    <div class="col-lg-7 mb-4">
+        <div class="edu-card d-flex flex-column" style="height: calc(100vh - 160px);">
+            
+            <!-- Buddy Header -->
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+                <div class="d-flex align-items-center">
+                    <img src="{% static 'img/' %}{{ profile.avatar }}.png" 
+                         onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed={{ profile.user.username }}';"
+                         alt="Buddy" class="rounded-circle me-3 border border-2 border-primary" style="width: 48px; height: 48px; background-color: white;">
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: var(--text-primary);">Buddy AI Tutor</h5>
+                        <div class="d-flex align-items-center">
+                            <span class="badge rounded-pill me-2" style="font-size: 0.7rem; width: 8px; height: 8px; padding: 0; background-color: var(--success);"></span>
+                            <span class="text-muted" style="font-size: 0.8rem;" id="buddy-status">Online & Ready!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice wave indicator -->
+                <div class="audio-visualizer-wave d-none" id="audioWave">
+                    <div class="audio-visualizer-bar"></div>
+                    <div class="audio-visualizer-bar"></div>
+                    <div class="audio-visualizer-bar"></div>
+                    <div class="audio-visualizer-bar"></div>
+                    <div class="audio-visualizer-bar"></div>
+                </div>
+            </div>
+
+            <!-- Messages stream -->
+            <div class="chat-container flex-grow-1 mb-3 p-3 overflow-y-auto" id="chatWindow" 
+                 style="height: 380px; background-color: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 12px;">
+                {% for msg in chat_messages %}
+                    <div class="d-flex mb-3 {% if msg.sender == 'child' %}justify-content-end{% endif %}">
+                        <div class="message-bubble {% if msg.sender == 'child' %}child{% else %}ai{% endif %}">
+                            {{ msg.text|linebreaksbr }}
+                            
+                            <!-- TTS Read button -->
+                            {% if msg.sender == 'ai' %}
+                                <div class="mt-2 text-end">
+                                    <button class="btn btn-sm btn-light py-0 px-2 rounded-pill text-muted" onclick="speakMessage(this)" style="font-size: 0.72rem; border: 1px solid var(--border-color); background-color: var(--bg-card); color: var(--text-secondary) !important;">
+                                        <i class="fa-solid fa-volume-high me-1"></i>Listen
+                                    </button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Chat Inputs & Voice trigger -->
+            <div class="chat-input-bar">
+                <form id="chatForm" onsubmit="submitMessage(event)" class="d-flex align-items-center gap-2">
+                    <input type="text" id="userInput" class="form-control rounded-pill px-4 py-3" placeholder="Type a message or click mic to speak..." autocomplete="off">
+                    
+                    <!-- Microphone trigger -->
+                    <button type="button" class="mic-button-glow" id="micButton" onclick="toggleVoiceInput()">
+                        <i class="fa-solid fa-microphone fs-5" id="micIcon"></i>
+                    </button>
+                    
+                    <button type="submit" class="btn btn-primary-edu rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 52px; height: 52px; min-width: 52px;">
+                        <i class="fa-solid fa-paper-plane fs-5"></i>
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Right Column: Interactive Sandbox Activities -->
+    <div class="col-lg-5 mb-4">
+        <div class="edu-card d-flex flex-column overflow-y-auto" style="height: calc(100vh - 160px);">
+            
+            <!-- Sandbox Canvas -->
+            <h6 class="section-title mb-2"><i class="fa-solid fa-wand-magic-sparkles text-accent me-2"></i>Visual Explanations Sandbox</h6>
+            <div id="visual-canvas">
+                <div id="visual-content" class="text-center w-100 p-3">
+                    <div class="floating-avatar fs-2 mb-2">🤖</div>
+                    <h6 class="fw-bold mb-1" style="color: var(--text-primary);">Visuals Playground</h6>
+                    <p class="caption-text mb-0">Speak to Buddy about planets or fractions to display dynamic animations.</p>
+                </div>
+            </div>
+
+            <!-- Flashcards preview -->
+            <h6 class="section-title mb-2 mt-2"><i class="fa-solid fa-images text-secondary me-2"></i>Learning Tools</h6>
+            <div class="p-3 rounded-4 mb-3" style="background-color: var(--primary-light); border: 1px solid var(--border-color);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold" style="font-size: 0.9rem; color: var(--text-primary);">Magic Study Cards</span>
+                    <a href="{% url 'activities:flashcard_list' %}" class="text-primary text-decoration-none fw-bold" style="font-size: 0.8rem;">Review Deck</a>
+                </div>
+                <p class="caption-text mb-0" style="color: var(--text-secondary) !important;">Use spaced repetition decks to study key science and math concepts.</p>
+            </div>
+
+            <!-- Quick Quiz link -->
+            <div class="p-3 rounded-4" style="background-color: var(--accent-light); border: 1px solid var(--border-color);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold" style="font-size: 0.9rem; color: var(--text-primary);">Adaptive Quiz Node</span>
+                    <a href="{% url 'activities:quiz_list' %}" class="text-accent text-decoration-none fw-bold" style="font-size: 0.8rem;">Take Quiz</a>
+                </div>
+                <p class="caption-text mb-0" style="color: var(--text-secondary) !important;">Think you mastered the topic? Challenge yourself with 5 adaptive questions.</p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const chatWindow = document.getElementById('chatWindow');
+    const audioWave = document.getElementById('audioWave');
+    const statusText = document.getElementById('buddy-status');
+    const micButton = document.getElementById('micButton');
+    const micIcon = document.getElementById('micIcon');
+    let isListening = false;
+
+    // Scroll window
+    const scrollToBottom = () => {
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    };
+    
+    document.addEventListener('DOMContentLoaded', scrollToBottom);
+
+    // Speak TTS
+    const speakMessage = (btnElement) => {
+        const bubble = btnElement.closest('.message-bubble');
+        let cleanText = bubble.innerText.replace("Listen", "").trim();
+        
+        statusText.textContent = "Buddy is speaking...";
+        audioWave.classList.remove('d-none');
+        
+        // Auto-mute recognition to prevent voice collision
+        window.eduverseVoice.stopListening();
+        isListening = false;
+        micIcon.className = "fa-solid fa-microphone fs-5";
+        micButton.classList.remove('mic-button-glow', 'active');
+        
+        window.eduverseVoice.speak(cleanText, 
+            () => {}, 
+            () => {
+                statusText.textContent = "Online & Ready!";
+                audioWave.classList.add('d-none');
+            }
+        );
+    };
+
+    // AJAX post message
+    const submitMessage = (event) => {
+        if (event) event.preventDefault();
+        
+        const input = document.getElementById('userInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = '';
+        appendMessage('child', text);
+        scrollToBottom();
+
+        statusText.textContent = "Buddy is thinking...";
+
+        // Form data payload
+        const formData = new FormData();
+        formData.append('session_id', '{{ session.id }}');
+        formData.append('message_text', text);
+        
+        fetch("{% url 'tutor:send_message_api' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                statusText.textContent = "Online & Ready!";
+                appendMessage('ai', data.ai_response);
+                scrollToBottom();
+
+                // TTS speak out
+                window.eduverseVoice.speak(data.ai_response, 
+                    () => {
+                        statusText.textContent = "Buddy is speaking...";
+                        audioWave.classList.remove('d-none');
+                    },
+                    () => {
+                        statusText.textContent = "Online & Ready!";
+                        audioWave.classList.add('d-none');
+                    }
+                );
+
+                // Render dynamic SVG
+                if (data.visual_data) {
+                    renderVisualExplanation(data.visual_data);
+                }
+            } else {
+                statusText.textContent = "Error occurred";
+                appendMessage('ai', "I encountered a tiny error. Could you repeat that?");
+            }
+        })
+        .catch(err => {
+            console.error("Error submitting message:", err);
+            statusText.textContent = "Error sending message";
+        });
+    };
+
+    const appendMessage = (sender, text) => {
+        const bubbleWrap = document.createElement('div');
+        bubbleWrap.className = `d-flex mb-3 ${sender === 'child' ? 'justify-content-end' : ''}`;
+        
+        let listenBtn = '';
+        if (sender === 'ai') {
+            listenBtn = `
+                <div class="mt-2 text-end">
+                    <button class="btn btn-sm btn-light py-0 px-2 rounded-pill text-muted" onclick="speakMessage(this)" style="font-size: 0.72rem; border: 1px solid var(--border-color); background-color: var(--bg-card); color: var(--text-secondary) !important;">
+                        <i class="fa-solid fa-volume-high me-1"></i>Listen
+                    </button>
+                </div>
+            `;
+        }
+
+        bubbleWrap.innerHTML = `
+            <div class="message-bubble ${sender === 'child' ? 'child' : 'ai'}">
+                ${text.replace(/\n/g, '<br>')}
+                ${listenBtn}
+            </div>
+        `;
+        chatWindow.appendChild(bubbleWrap);
+    };
+
+    // Speech STT Voice input toggle
+    const toggleVoiceInput = () => {
+        if (isListening) {
+            window.eduverseVoice.stopListening();
+            statusText.textContent = "Online & Ready!";
+            micIcon.className = "fa-solid fa-microphone fs-5";
+            micButton.classList.remove('active');
+            isListening = false;
+        } else {
+            statusText.textContent = "Listening to you...";
+            micIcon.className = "fa-solid fa-circle-dot text-white fs-5";
+            micButton.classList.add('active');
+            isListening = true;
+
+            // Stop speech synthesis output
+            window.eduverseVoice.stopSpeaking();
+            audioWave.classList.add('d-none');
+
+            window.eduverseVoice.startListening(
+                (resultText) => {
+                    document.getElementById('userInput').value = resultText;
+                    submitMessage();
+                },
+                () => {
+                    statusText.textContent = "Online & Ready!";
+                    micIcon.className = "fa-solid fa-microphone fs-5";
+                    micButton.classList.remove('active');
+                    isListening = false;
+                },
+                (err) => {
+                    statusText.textContent = "Check mic permissions!";
+                    micIcon.className = "fa-solid fa-microphone fs-5";
+                    micButton.classList.remove('active');
+                    isListening = false;
+                }
+            );
+        }
+    };
+
+    // Dynamic SVG Draw Parser
+    const renderVisualExplanation = (visualData) => {
+        const canvas = document.getElementById('visual-content');
+        
+        if (visualData.type === 'fraction') {
+            const parts = visualData.args.split('/');
+            const num = parseInt(parts[0]) || 1;
+            const den = parseInt(parts[1]) || 2;
+            
+            let pathsHtml = '';
+            for (let i = 0; i < den; i++) {
+                const angle1 = (i * 2 * Math.PI) / den - Math.PI / 2;
+                const angle2 = ((i + 1) * 2 * Math.PI) / den - Math.PI / 2;
+                
+                const x1 = 50 + 40 * Math.cos(angle1);
+                const y1 = 50 + 40 * Math.sin(angle1);
+                const x2 = 50 + 40 * Math.cos(angle2);
+                const y2 = 50 + 40 * Math.sin(angle2);
+                
+                const fillColor = i < num ? '#8B5CF6' : '#E2E8F0';
+                pathsHtml += `<path d="M 50 50 L ${x1} ${y1} A 40 40 0 0 1 ${x2} ${y2} Z" fill="${fillColor}" stroke="#ffffff" stroke-width="1.5"/>`;
+            }
+            
+            canvas.innerHTML = `
+                <h6 class="fw-bold mb-3"><i class="fa-solid fa-chart-pie me-2 text-primary"></i>Fraction Visualizer</h6>
+                <svg width="150" height="150" viewBox="0 0 100 100" class="mb-3">
+                    <circle cx="50" cy="50" r="40" fill="#E2E8F0"/>
+                    ${pathsHtml}
+                </svg>
+                <div class="alert alert-light border rounded-4 py-2 mb-0" style="font-size: 0.85rem; background-color: var(--bg-main); border-color: var(--border-color) !important;">
+                    This is <strong>${num}/${den}</strong> parts of a whole circle.
+                </div>
+            `;
+        } else if (visualData.type === 'orbits' || visualData.type === 'solar_system') {
+            const planetsCount = parseInt(visualData.args) || 3;
+            const colors = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6'];
+            
+            let orbitsHtml = '';
+            let planetsHtml = '';
+            
+            for (let i = 0; i < planetsCount; i++) {
+                const radius = 20 + i * 8;
+                const speed = 6 + i * 4;
+                const planetColor = colors[i % colors.length];
+                
+                orbitsHtml += `<circle cx="50" cy="50" r="${radius}" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-dasharray="2"/>`;
+                planetsHtml += `
+                    <circle cx="${50 + radius}" cy="50" r="${3.5 - i * 0.4}" fill="${planetColor}">
+                        <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="${speed}s" repeatCount="indefinite" />
+                    </circle>
+                `;
+            }
+            
+            canvas.innerHTML = `
+                <h6 class="fw-bold mb-3"><i class="fa-solid fa-space-shuttle me-2 text-secondary"></i>Planetary Orbits</h6>
+                <svg width="160" height="160" viewBox="0 0 100 100" style="background:#0F172A; border-radius: 50%;" class="mb-3">
+                    <circle cx="50" cy="50" r="10" fill="#FBBF24" style="filter: drop-shadow(0 0 6px #F59E0B);"/>
+                    ${orbitsHtml}
+                    ${planetsHtml}
+                </svg>
+                <div class="alert alert-light border rounded-4 py-2 mb-0" style="font-size: 0.85rem; background-color: var(--bg-main); border-color: var(--border-color) !important;">
+                    Revolving <strong>${planetsCount}</strong> planets around the central Sun.
+                </div>
+            `;
+        } else if (visualData.type === 'blocks') {
+            const actionText = visualData.args || 'Repeat 10';
+            canvas.innerHTML = `
+                <h6 class="fw-bold mb-3"><i class="fa-solid fa-cubes me-2 text-success"></i>Coding Loop Blocks</h6>
+                <div class="text-start p-2 rounded-4 border mb-3" style="background-color: var(--bg-main); border-color: var(--border-color) !important;">
+                    <div class="scratch-block text-warning" style="font-size:0.8rem;"><i class="fa-solid fa-play me-2"></i>When Flag Clicked</div>
+                    <div class="scratch-block ms-3" style="background:#10B981; font-size:0.8rem;"><i class="fa-solid fa-rotate-right me-2"></i>${actionText} times</div>
+                    <div class="scratch-block ms-4" style="background:#3B82F6; font-size:0.8rem;"><i class="fa-solid fa-rocket me-2"></i>Fly Rocket Up</div>
+                </div>
+            `;
+        }
+    };
+</script>
+{% endblock %}

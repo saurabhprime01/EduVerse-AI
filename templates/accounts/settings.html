@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Settings - EduVerse AI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <!-- Settings Card -->
+        <div class="edu-card">
+            
+            <div class="d-flex align-items-center mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+                <div class="bg-primary-light p-3 rounded-circle me-3 text-primary" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-sliders fs-3"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0" style="color: var(--text-primary);">Profile Settings</h3>
+                    <p class="caption-text text-muted mb-0">Make your learning adventure match your style!</p>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                
+                <h5 class="fw-bold mb-3" style="color: var(--text-primary);"><i class="fa-solid fa-circle-user text-primary me-2"></i>Personal Info</h5>
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Your Age</label>
+                        {{ form.age }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Learning Style</label>
+                        {{ form.learning_style }}
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-3" style="color: var(--text-primary);"><i class="fa-solid fa-graduation-cap text-secondary me-2"></i>Avatar & Difficulty</h5>
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-muted" style="font-size: 0.85rem;">AI Level / Difficulty</label>
+                        {{ form.difficulty_level }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Choose Buddy Avatar</label>
+                        <select name="avatar" class="form-select rounded-pill px-4">
+                            <option value="buddy_normal" {% if profile.avatar == 'buddy_normal' %}selected{% endif %}>🤖 Classic Buddy</option>
+                            <option value="buddy_rocket" {% if profile.avatar == 'buddy_rocket' %}selected{% endif %}>🚀 Rocket Buddy</option>
+                            <option value="buddy_wizard" {% if profile.avatar == 'buddy_wizard' %}selected{% endif %}>🧙 Magic Wizard Buddy</option>
+                            <option value="buddy_nature" {% if profile.avatar == 'buddy_nature' %}selected{% endif %}>🌱 Nature Green Buddy</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-3" style="color: var(--text-primary);"><i class="fa-solid fa-palette text-accent me-2"></i>Choose visual skin</h5>
+                <div class="row mb-4">
+                    {% for theme_val, theme_name in themes %}
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check p-0">
+                                <input class="form-check-input d-none" type="radio" name="theme" id="{{ theme_val }}" value="{{ theme_val }}" {% if profile.selected_theme == theme_val %}checked{% endif %}>
+                                <label class="form-check-label w-100 border rounded-4 p-3 text-center cursor-pointer {% if profile.selected_theme == theme_val %}border-primary bg-primary-light text-primary{% else %}bg-transparent text-muted{% endif %}" for="{{ theme_val }}" style="cursor: pointer; transition: all 0.2s ease; border-color: var(--border-color) !important;">
+                                    <div class="fw-bold">{{ theme_name }}</div>
+                                </label>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary-edu px-5 py-3">Save My Changes! ✨</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('input[name="theme"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            document.querySelectorAll('input[name="theme"] + label').forEach(label => {
+                label.className = "form-check-label w-100 border rounded-4 p-3 text-center cursor-pointer bg-transparent text-muted";
+                label.style.borderColor = "var(--border-color)";
+            });
+            const label = document.querySelector(`label[for="${e.target.id}"]`);
+            label.className = "form-check-label w-100 border rounded-4 p-3 text-center cursor-pointer border-primary bg-primary-light text-primary";
+        });
+    });
+</script>
+{% endblock %}
