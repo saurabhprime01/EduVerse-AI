@@ -46,6 +46,23 @@ EduVerse AI is a next-generation adaptive education platform designed to make le
 
 ---
 
+## 📁 Codebase Architecture (Frontend vs. Backend Separation)
+
+Although Django is a monolithic MTV framework, the frontend (User Interface) and backend (Business Logic & API views) codes are separated cleanly within the directories:
+
+### ⚙️ Backend (Python & Django Modules)
+* **API Views & Controllers (`views.py`)**: Computes adaptive quiz routing, processes custom items unlocks, and manages session history logs.
+* **Database Schema Models (`models.py`)**: Defines custom SQL tables like `TopicProgress`, `LearningMemory` (Digital Twin logs), `Flashcard`, and `ShopItem`.
+* **AI Cognitive Strategy Service (`tutor/services.py`)**: Wraps the Google Gemini prompt templates and processes structured metadata parses.
+* **Routing Maps (`urls.py`)**: Coordinates API routing maps and path controllers.
+
+### 🖥️ Frontend (UI & Assets)
+* **HTML Templates (`templates/`)**: Houses page structures (dashboard, parent analytics, settings panels, workspace panels).
+* **Styling System (`static/css/custom.css`)**: Holds visual theme selectors, custom skins, and strict 8px spacing rules.
+* **Speech Handler (`static/js/voice.js`)**: Controls client browser dictation triggers and voice output rates.
+
+---
+
 ## 🖥️ Project Portal Links (Localhost)
 
 Once the local server is running, you can access the frontend and backend portals of the product directly:
