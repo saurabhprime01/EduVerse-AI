@@ -46,6 +46,15 @@ EduVerse AI is a next-generation adaptive education platform designed to make le
 
 ---
 
+## 🖥️ Project Portal Links (Localhost)
+
+Once the local server is running, you can access the frontend and backend portals of the product directly:
+* **Frontend Learner Workspace**: [http://127.0.0.1:8000/](http://127.0.0.1:8000/) (Main student interface for chat lessons, adaptive quizzes, and dynamic visual canvas).
+* **Parent Room Insight Dashboard**: [http://127.0.0.1:8000/accounts/parent/](http://127.0.0.1:8000/accounts/parent/) (Parent metrics, Chart.js mapping, and AI Pedagogical advice card updates).
+* **Backend Admin Console**: [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/) (Django's built-in database control panel to manage models, rewards, and logs).
+
+---
+
 ## 🚀 Setup & Installation Instructions
 
 Follow these steps to run the Django server locally on your computer:
